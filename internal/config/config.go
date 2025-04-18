@@ -2,10 +2,7 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"os"
-	"os/user"
 )
 
 const CONFIG_PATH = "./.gatorconfig.json"
@@ -15,12 +12,12 @@ type Config struct {
 	CurrentUserName string `json:"current_user_name"`
 }
 
-func Read() Config {
+func Read() (Config, error) {
 	var cfg Config
 
 	file, err := os.Open(CONFIG_PATH)
 	if err != nil {
-		log.Fatal("error opening config file : ", err)
+		return cfg, err
 	}
 	defer file.Close()
 
@@ -28,29 +25,21 @@ func Read() Config {
 	err = decoder.Decode(&cfg)
 
 	if err != nil {
-		log.Fatal("error decoding config file : ", err)
+		return cfg, err
 	}
 
-	return cfg
+	return cfg, nil
 }
 
-func (cfg *Config) SetUser() {
-	username := "user"
+func (cfg *Config) SetUser(userName string) error {
+	cfg.CurrentUserName = userName
 
-	currentUser, err := user.Current()
-
+	err := write(cfg)
 	if err != nil {
-		fmt.Println("did no find username, assigning 'user' as default")
-	} else {
-		username = currentUser.Username
+		return err
 	}
 
-	cfg.CurrentUserName = username
-
-	err = write(cfg)
-	if err != nil {
-		log.Fatal("error writing to config file : ", err)
-	}
+	return nil
 }
 
 func write(cfg *Config) error {

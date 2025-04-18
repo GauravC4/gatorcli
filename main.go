@@ -2,14 +2,18 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/GauravC4/gatorcli/internal/config"
 )
 
 func main() {
-	cfg := config.Read()
-	cfg.SetUser()
+	cfg, err := config.Read()
+	if err != nil {
+		log.Fatal("error reading from config file : ", err)
+	}
 
-	cfg = config.Read()
+	cfg.SetUser("gaurav")
+
 	fmt.Printf("%+v\n", cfg)
 }
